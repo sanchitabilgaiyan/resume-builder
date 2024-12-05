@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Builder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px auto;
+            max-width: 600px;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input, textarea, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 80%;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #preview {
+            margin-top: 20px;
+            text-align: left;
+        }
+        #preview h2 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Resume Builder</h1>
+    <p>Fill out the form below to generate your resume</p>
+    <form id="resumeForm">
+        <input type="text" id="name" placeholder="Full Name" required>
+        <input type="text" id="profession" placeholder="Profession" required>
+        <textarea id="skills" placeholder="Skills (comma-separated)" rows="3" required></textarea>
+        <textarea id="experience" placeholder="Experience (optional)" rows="5"></textarea>
+        <button type="submit">Generate Resume</button>
+    </form>
+    <div id="preview"></div>
+    <script>
+        document.getElementById("resumeForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            // Collect input values
+            const name = document.getElementById("name").value;
+            const profession = document.getElementById("profession").value;
+            const skills = document.getElementById("skills").value;
+            const experience = document.getElementById("experience").value;
+
+            const previewDiv = document.getElementById("preview");
+            previewDiv.innerHTML = "Generating resume...";
+
+            // Send data to backend
+            const response = await fetch("https://your-backend-url/generate-resume", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, profession, skills, experience }),
+            });
+
+            const data = await response.json();
+
+            // Display resume or provide download link
+            previewDiv.innerHTML = `
+                <h2>Your Resume</h2>
+                <pre>${data.resume}</pre>
+                <button onclick="downloadPDF()">Download Resume as PDF</button>
+            `;
+
+            // Function to download the resume as PDF
+            window.downloadPDF = function () {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF();
+                pdf.text(data.resume, 10, 10);
+                pdf.save(`${name}_Resume.pdf`);
+            };
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+</body>
+</html>
